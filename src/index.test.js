@@ -7,30 +7,33 @@ describe('getPreloadData', () => {
         chunkGroups: [{
           name: 'p__user',
           chunks: [{
-            name: 'p__user',
+            files: [
+              'p__user.12a45678.async.js',
+              'p__user.12v45678.chunk.css',
+              'p__user.js.map',
+              'xxx.hot-update.js',
+            ],
           }],
         }, {
           name: 'p__index',
           chunks: [{
-            name: 'components__test',
+            files: ['components__test.js'],
           }, {
-            name: 'p__index__abc',
-          }, {
-            name: 'p__index__123',
+            files: ['p__index__abc.js', 'p__index__123.js'],
           }],
         }, {
           name: 'p__b',
           chunks: [{
-            name: 'components__test',
+            files: ['components__test.js'],
           }, {
-            name: 'p__b',
+            files: ['p__b.js']
           }],
         }, {
           name: 'p__h5b',
           chunks: [{
-            name: 'components__test',
+            files: ['components__test.js'],
           }, {
-            name: 'p__h5b',
+            files: ['p__h5b.js'],
           }],
         }],
       },
@@ -48,11 +51,11 @@ describe('getPreloadData', () => {
         preloadKey: '/h5b',
         component: 'pages/h5b.jsx',
       }],
-    }])).toEqual({
-      '/user': ['p__user'],
-      '/': ['components__test', 'p__index__abc', 'p__index__123'],
-      '/b': ['components__test', 'p__index__abc', 'p__index__123', 'p__b'],
-      '/h5b': ['components__test', 'p__index__abc', 'p__index__123', 'p__h5b'],
+    }], true)).toEqual({
+      '/user': ['p__user.js', 'p__user.css'],
+      '/': ['components__test.js', 'p__index__abc.js', 'p__index__123.js'],
+      '/b': ['components__test.js', 'p__index__abc.js', 'p__index__123.js', 'p__b.js'],
+      '/h5b': ['components__test.js', 'p__index__abc.js', 'p__index__123.js', 'p__h5b.js'],
     });
   });
 });

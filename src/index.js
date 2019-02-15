@@ -24,15 +24,16 @@ function patchDataWithRoutes(preloadData, routes = [], chunkGroupData, parentChu
       .replace(/^src__/, '')
       .replace(/^pages__/, 'p__')
       .replace(/^page__/, 'p__');
-    const chunks = flatten(chunkGroupData.filter(chunk => {
-      return chunk.name.indexOf(webpackChunkName) === 0;
-    }).map(chunk => chunk.chunks));
+    const chunks = flatten(chunkGroupData.filter(group => {
+      // 这里用 indexOf 而不用精确匹配是为了兼容 dva model 也使用动态加载的情况
+      return group.name.indexOf(webpackChunkName) === 0;
+    }).map(group => group.chunks));
     preloadData[key] = uniq(preloadData[key].concat(parentChunks).concat(chunks));
     patchDataWithRoutes(preloadData, route.routes, chunkGroupData, preloadData[key])
   });
 }
 
-function getPreloadData({ compilation }, routes) {
+function getPreloadData({ compilation }, routes, useRawFileName) {
   const allChunks = compilation.chunkGroups;
   // preloadData like this:
   // {
@@ -43,7 +44,14 @@ function getPreloadData({ compilation }, routes) {
   const chunkGroupData = allChunks.map((group) => {
     return {
       name: group.name,
-      chunks: group.chunks.map(chunk => chunk.name),
+      chunks: flatten(group.chunks.map(chunk => {
+        return chunk.files.filter(file => !/(\.map$)|(hot\-update\.js)/.test(file)).map(file => {
+          if (useRawFileName) {
+            return file.replace(/\.\w{8}.chunk.css$/, '.css').replace(/\.\w{8}.async.js$/, '.js');;
+          }
+          return file;
+        });
+      })),
     };
   });
   patchDataWithRoutes(preloadData, routes, chunkGroupData);
@@ -52,17 +60,18 @@ function getPreloadData({ compilation }, routes) {
 
 const PRELOAD_FILENAME = 'preload.json';
 
-export default function (api, options) {
+export default function (api, options = {}) {
   const { paths } = api;
+  const { useRawFileName = false } = options;
 
   api.onDevCompileDone(({ stats }) => {
-    const preloadData = getPreloadData(stats, api.routes);
+    const preloadData = getPreloadData(stats, api.routes, false);
     const filePath = join(paths.absTmpDirPath, PRELOAD_FILENAME);
     writeFileSync(filePath, JSON.stringify(preloadData, null, 2));
   });
 
   api.onBuildSuccess(({ stats }) => {
-    const preloadData = getPreloadData(stats, api.routes);
+    const preloadData = getPreloadData(stats, api.routes, useRawFileName);
     const filePath = join(paths.absOutputPath, PRELOAD_FILENAME);
     writeFileSync(filePath, JSON.stringify(preloadData, null, 2));
   });

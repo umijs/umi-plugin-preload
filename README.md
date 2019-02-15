@@ -17,9 +17,18 @@ export default {
 }
 ```
 
-## Options
+## Option
 
-TODO
+```js
+{
+  useRawFileName: false, // default is false
+}
+```
+
+## Features (PR welcome)
+
+- [x] 生成 preload.json
+- [ ] 支持自动往 HTML 中添加 JS
 
 ## LICENSE
 
