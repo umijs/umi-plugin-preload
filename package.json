@@ -21,9 +21,11 @@
   "scripts": {
     "build": "umi-tools build",
     "test": "umi-test",
+    "coveralls": "cat ./coverage/lcov.info | coveralls",
     "prepublishOnly": "npm run build && np --no-cleanup --yolo --no-publish"
   },
   "devDependencies": {
+    "coveralls": "^3.0.2",
     "np": "^3.0.4",
     "umi-plugin-react": "^1.4.2",
     "umi-test": "^1.3.3",
