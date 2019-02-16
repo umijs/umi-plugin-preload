@@ -22,6 +22,7 @@ export default {
 ```js
 {
   // useRawFileName 设置为 true 之后 preload.json 中的内容会去掉 hash 值
+  // test
   useRawFileName: false, // default is false
 }
 ```
