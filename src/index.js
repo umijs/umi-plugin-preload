@@ -16,7 +16,7 @@ function normalizeEntry(entry) {
     .replace(/\.tsx?$/, '');
 }
 
-function patchDataWithRoutes(preloadData, routes = [], chunkGroupData, parentChunks = []) {
+function patchDataWithRoutes(preloadData, routes = [], chunkGroupData, parentChunks = [], dva) {
   routes.forEach(route => {
     const key = route.preloadKey || route.path || '__404'; // __404 是为了配置路由的情况下的 404 页面
     preloadData[key] = preloadData[key] || [];
@@ -25,15 +25,26 @@ function patchDataWithRoutes(preloadData, routes = [], chunkGroupData, parentChu
       .replace(/^pages__/, 'p__')
       .replace(/^page__/, 'p__');
     const chunks = flatten(chunkGroupData.filter(group => {
-      // 这里用 indexOf 而不用精确匹配是为了兼容 dva model 也使用动态加载的情况
-      return group.name.indexOf(webpackChunkName) === 0;
+      let isMatch = false;
+      if (group.name === webpackChunkName) {
+        isMatch = true;
+      } else if (dva) {
+        // p__user__test__models__data.js.js -> p_user__test
+        const groupNameWithoutModel = group.name.replace(/__model.+$/, '');
+        if (webpackChunkName.indexOf(groupNameWithoutModel) === 0) {
+          // 只要 model 是在路由对应组件的文件夹下（包含上层文件夹下）那么 model 就会被 umi-plugin-dva 自动挂载
+          // 这种情况下对应的 model 也需要加到预加载中
+          isMatch = true;
+        }
+      }
+      return isMatch;
     }).map(group => group.chunks));
     preloadData[key] = uniq(preloadData[key].concat(parentChunks).concat(chunks));
-    patchDataWithRoutes(preloadData, route.routes, chunkGroupData, preloadData[key])
+    patchDataWithRoutes(preloadData, route.routes, chunkGroupData, preloadData[key], dva)
   });
 }
 
-function getPreloadData({ compilation }, routes, useRawFileName) {
+function getPreloadData({ compilation }, routes, { useRawFileName, dva }) {
   const allChunks = compilation.chunkGroups;
   // preloadData like this:
   // {
@@ -54,7 +65,7 @@ function getPreloadData({ compilation }, routes, useRawFileName) {
       })),
     };
   });
-  patchDataWithRoutes(preloadData, routes, chunkGroupData);
+  patchDataWithRoutes(preloadData, routes, chunkGroupData, [], dva);
   return preloadData;
 }
 
@@ -62,16 +73,22 @@ const PRELOAD_FILENAME = 'preload.json';
 
 export default function (api, options = {}) {
   const { paths } = api;
-  const { useRawFileName = false } = options;
+  const { useRawFileName = false, dva = false } = options;
 
   api.onDevCompileDone(({ stats }) => {
-    const preloadData = getPreloadData(stats, api.routes, false);
+    const preloadData = getPreloadData(stats, api.routes, {
+      useRawFileName: false,
+      dva,
+    });
     const filePath = join(paths.absTmpDirPath, PRELOAD_FILENAME);
     writeFileSync(filePath, JSON.stringify(preloadData, null, 2));
   });
 
   api.onBuildSuccess(({ stats }) => {
-    const preloadData = getPreloadData(stats, api.routes, useRawFileName);
+    const preloadData = getPreloadData(stats, api.routes, {
+      useRawFileName,
+      dva,
+    });
     const filePath = join(paths.absOutputPath, PRELOAD_FILENAME);
     writeFileSync(filePath, JSON.stringify(preloadData, null, 2));
   });
