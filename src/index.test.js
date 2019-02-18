@@ -65,10 +65,26 @@ describe('getPreloadData', () => {
       dva: true,
       useRawFileName: true,
     })).toEqual({
-      '/user': ['p__user.js', 'p__user.css', 'p__user__model.js.js', 'p__user__test__models__data.js.js'],
-      '/': ['components__test.js', 'p__index__abc.js', 'p__index__123.js'],
-      '/b': ['components__test.js', 'p__index__abc.js', 'p__index__123.js', 'p__b.js'],
-      '/h5b': ['components__test.js', 'p__index__abc.js', 'p__index__123.js', 'p__h5b.js'],
+      routes: [{
+        path: '/user',
+        preloadKey: '/user',
+      }, {
+        path: '/',
+        preloadKey: '/',
+        routes: [{
+          path: '/b',
+          preloadKey: '/b',
+        }, {
+          path: '/b',
+          preloadKey: '/h5b',
+        }],
+      }],
+      preloadMap: {
+        '/user': ['p__user.js', 'p__user.css', 'p__user__model.js.js', 'p__user__test__models__data.js.js'],
+        '/': ['components__test.js', 'p__index__abc.js', 'p__index__123.js'],
+        '/b': ['components__test.js', 'p__index__abc.js', 'p__index__123.js', 'p__b.js'],
+        '/h5b': ['components__test.js', 'p__index__abc.js', 'p__index__123.js', 'p__h5b.js'],
+      }
     });
   });
 });
