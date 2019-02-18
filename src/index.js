@@ -16,10 +16,10 @@ function normalizeEntry(entry) {
     .replace(/\.tsx?$/, '');
 }
 
-function patchDataWithRoutes(preloadData, routes = [], chunkGroupData, parentChunks = [], dva) {
+function patchDataWithRoutes(preloadMap, routes = [], chunkGroupData, parentChunks = [], dva) {
   routes.forEach(route => {
     const key = route.preloadKey || route.path || '__404'; // __404 是为了配置路由的情况下的 404 页面
-    preloadData[key] = preloadData[key] || [];
+    preloadMap[key] = preloadMap[key] || [];
     const webpackChunkName = normalizeEntry(route.component || 'common_component')
       .replace(/^src__/, '')
       .replace(/^pages__/, 'p__')
@@ -39,8 +39,8 @@ function patchDataWithRoutes(preloadData, routes = [], chunkGroupData, parentChu
       }
       return isMatch;
     }).map(group => group.chunks));
-    preloadData[key] = uniq(preloadData[key].concat(parentChunks).concat(chunks));
-    patchDataWithRoutes(preloadData, route.routes, chunkGroupData, preloadData[key], dva)
+    preloadMap[key] = uniq(preloadMap[key].concat(parentChunks).concat(chunks));
+    patchDataWithRoutes(preloadMap, route.routes, chunkGroupData, preloadMap[key], dva)
   });
 }
 
@@ -51,7 +51,7 @@ function getPreloadData({ compilation }, routes, { useRawFileName, dva }) {
   //   '/a': ['xxx.js', 'xxx.css'], 
   // }
   //
-  const preloadData = {};
+  const preloadMap = {};
   const chunkGroupData = allChunks.map((group) => {
     return {
       name: group.name,
@@ -65,8 +65,24 @@ function getPreloadData({ compilation }, routes, { useRawFileName, dva }) {
       })),
     };
   });
-  patchDataWithRoutes(preloadData, routes, chunkGroupData, [], dva);
-  return preloadData;
+  patchDataWithRoutes(preloadMap, routes, chunkGroupData, [], dva);
+  return {
+    routes: parseRoutesInfo(routes),
+    preloadMap,
+  };
+}
+
+function parseRoutesInfo(routes) {
+  return routes.map(route => {
+    const ret = {
+      path: route.path,
+      preloadKey: route.preloadKey || route.path ||  '__404',
+    }
+    if (route.routes) {
+      ret.routes = parseRoutesInfo(route.routes);
+    }
+    return ret;
+  });
 }
 
 const PRELOAD_FILENAME = 'preload.json';
