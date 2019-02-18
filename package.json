@@ -1,6 +1,6 @@
 {
   "name": "umi-plugin-preload",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "Support preload async chunk for improve page loading performance",
   "license": "MIT",
   "repository": {
