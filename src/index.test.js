@@ -50,6 +50,7 @@ describe('getPreloadData', () => {
     }, [{
       path: '/user',
       component: 'page/user/test/user.ts',
+      exact: true,
     }, {
       path: '/',
       component: 'pages/index.jsx',
@@ -68,6 +69,7 @@ describe('getPreloadData', () => {
       routes: [{
         path: '/user',
         preloadKey: '/user',
+        exact: true,
       }, {
         path: '/',
         preloadKey: '/',
