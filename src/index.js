@@ -76,6 +76,7 @@ function parseRoutesInfo(routes) {
   return routes.map(route => {
     const ret = {
       path: route.path,
+      exact: route.exact,
       preloadKey: route.preloadKey || route.path ||  '__404',
     }
     if (route.routes) {
