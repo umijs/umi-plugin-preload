@@ -1,4 +1,4 @@
-import { getPreloadData } from './index';
+import { getPreloadData, getChunkByPath } from './index';
 
 describe('getPreloadData', () => {
   it('getPreloadData', () => {
@@ -88,6 +88,10 @@ describe('getPreloadData', () => {
         '/h5b': ['components__test.js', 'p__index__abc.js', 'p__index__123.js', 'p__h5b.js'],
       }
     });
+  });
+
+  it('getChunkByPath exist', () => {
+    expect(typeof getChunkByPath).toEqual('function');
   });
 });
 
