@@ -26,6 +26,15 @@ export default {
 }
 ```
 
+## API
+
+### getChunkByPath
+
+```js
+getChunkByPath('/test', preloadConfig); // preloadConfig is the json from preload.json
+// => [String, ...]
+```
+
 ## Features (PR welcome)
 
 - [x] 生成 preload.json
