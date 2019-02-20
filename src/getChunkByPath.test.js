@@ -3,6 +3,9 @@ import getChunkByPath from './getChunkByPath';
 describe('getChunkByPath', () => {
   const preloadConfig = {
     routes: [{
+      path: '/testredirect',
+      redirect: '/b2'
+    }, {
       path: '/test'
     }, {
       path: '/user/:id',
@@ -33,6 +36,7 @@ describe('getChunkByPath', () => {
     expect(getChunkByPath('/', preloadConfig)).toEqual(['components__test.js', 'p__index__abc.js', 'p__index__123.js']);
     expect(getChunkByPath('/user/123', preloadConfig)).toEqual(['p__user.js', 'p__user.css', 'p__user__model.js.js', 'p__user__test__models__data.js.js']);
     expect(getChunkByPath('/b2', preloadConfig)).toEqual(['components__test.js', 'p__index__abc.js', 'p__index__123.js', 'p__h5b.js']);
+    expect(getChunkByPath('/testredirect', preloadConfig)).toEqual(['components__test.js', 'p__index__abc.js', 'p__index__123.js', 'p__h5b.js']);
   });
 
   it('not find', () => {

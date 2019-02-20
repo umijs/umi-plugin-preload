@@ -48,6 +48,9 @@ describe('getPreloadData', () => {
         }],
       },
     }, [{
+      path: '/testredirect',
+      redirect: '/user',
+    }, {
       path: '/user',
       component: 'page/user/test/user.ts',
       exact: true,
@@ -67,6 +70,10 @@ describe('getPreloadData', () => {
       useRawFileName: true,
     })).toEqual({
       routes: [{
+        path: '/testredirect',
+        preloadKey: '/testredirect',
+        redirect: '/user',
+      }, {
         path: '/user',
         preloadKey: '/user',
         exact: true,
@@ -82,6 +89,7 @@ describe('getPreloadData', () => {
         }],
       }],
       preloadMap: {
+        '/testredirect': [],
         '/user': ['p__user.js', 'p__user.css', 'p__user__model.js.js', 'p__user__test__models__data.js.js'],
         '/': ['components__test.js', 'p__index__abc.js', 'p__index__123.js'],
         '/b': ['components__test.js', 'p__index__abc.js', 'p__index__123.js', 'p__b.js'],

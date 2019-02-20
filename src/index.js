@@ -78,6 +78,7 @@ function parseRoutesInfo(routes) {
     const ret = {
       path: route.path,
       exact: route.exact,
+      redirect: route.redirect,
       preloadKey: route.preloadKey || route.path ||  '__404',
     }
     if (route.routes) {
