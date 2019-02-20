@@ -6,6 +6,7 @@ import { writeFileSync } from 'fs';
 import { join } from 'path';
 import flatten from 'lodash/flatten';
 import uniq from 'lodash/uniq';
+import getChunkByPath from './getChunkByPath';
 
 // normalizeEntry copy from https://github.com/umijs/umi/blob/master/packages/umi-build-dev/src/routes/routesToJSON.js#L83
 function normalizeEntry(entry) {
@@ -113,4 +114,5 @@ export default function (api, options = {}) {
 
 export {
   getPreloadData, // export for test
+  getChunkByPath,
 };
