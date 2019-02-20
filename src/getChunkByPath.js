@@ -12,7 +12,10 @@ const getChunkByPath = (path, config) => {
   const matchRoute = matchedRoutes.pop();
   let chunks = [];
   if (matchRoute && matchRoute.route) {
-    const { preloadKey, path } = matchRoute.route;
+    const { preloadKey, path, redirect } = matchRoute.route;
+    if (redirect) {
+      return getChunkByPath(redirect, config);
+    }
     if (preloadMap[preloadKey || path]) {
       chunks = preloadMap[preloadKey || path];
     }
