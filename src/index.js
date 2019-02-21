@@ -91,8 +91,14 @@ function parseRoutesInfo(routes) {
 const PRELOAD_FILENAME = 'preload.json';
 
 export default function (api, options = {}) {
-  const { paths } = api;
+  const { paths, debug } = api;
   const { useRawFileName = false, dva = false } = options;
+
+  function writePreloadData(target, data) {
+    debug(`will write preload file to ${target}`);
+    writeFileSync(target, JSON.stringify(data, null, 2));
+    debug(`write preload file to ${target}`);
+  }
 
   api.onDevCompileDone(({ stats }) => {
     const preloadData = getPreloadData(stats, api.routes, {
@@ -100,7 +106,7 @@ export default function (api, options = {}) {
       dva,
     });
     const filePath = join(paths.absTmpDirPath, PRELOAD_FILENAME);
-    writeFileSync(filePath, JSON.stringify(preloadData, null, 2));
+    writePreloadData(filePath, preloadData);
   });
 
   api.onBuildSuccess(({ stats }) => {
@@ -109,7 +115,7 @@ export default function (api, options = {}) {
       dva,
     });
     const filePath = join(paths.absOutputPath, PRELOAD_FILENAME);
-    writeFileSync(filePath, JSON.stringify(preloadData, null, 2));
+    writePreloadData(filePath, preloadData)
   });
 }
 
