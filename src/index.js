@@ -87,6 +87,7 @@ function parseRoutesInfo(routes, preloadKeyGenerator) {
       path: route.path,
       exact: route.exact,
       redirect: route.redirect,
+      matchCondition: route.matchCondition,
       preloadKey: getPreloadKey(route, preloadKeyGenerator),
     }
     if (route.routes) {

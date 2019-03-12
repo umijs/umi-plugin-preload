@@ -59,6 +59,9 @@ describe('getPreloadData', () => {
       component: 'pages/index.jsx',
       routes: [{
         path: '/b',
+        matchCondition: {
+          test: true,
+        },
         component: 'pages/b.jsx',
       }, {
         path: '/b',
@@ -85,6 +88,9 @@ describe('getPreloadData', () => {
           preloadKey: '/b',
         }, {
           path: '/b',
+          matchCondition: {
+            test: true,
+          },
           preloadKey: '/h5b',
         }],
       }],
