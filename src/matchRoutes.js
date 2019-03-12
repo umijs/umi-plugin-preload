@@ -12,7 +12,10 @@ const computeMatch = (pathname) => {
   };
 };
 
-const matchRoutes = (routes, pathname, /*not public API*/branch = []) => {
+const matchRoutes = (routes, pathname, routeFilter, /*not public API*/branch = []) => {
+  if (routeFilter) {
+    routes = routes.filter(routeFilter)
+  }
   routes.some((route) => {
     const match = route.path
       ? matchPath(pathname, route)
@@ -24,7 +27,7 @@ const matchRoutes = (routes, pathname, /*not public API*/branch = []) => {
       branch.push({ route, match })
 
       if (route.routes) {
-        matchRoutes(route.routes, pathname, branch)
+        matchRoutes(route.routes, pathname, routeFilter, branch)
       }
     }
 
