@@ -10,6 +10,11 @@ describe('getChunkByPath', () => {
     }, {
       path: '/user/:id',
       exact: true,
+      filter: true,
+    }, {
+      path: '/user/:id',
+      preloadKey: '/b',
+      exact: true,
     }, {
       path: '/',
       preloadKey: '/',
@@ -46,6 +51,12 @@ describe('getChunkByPath', () => {
   it('lack args', () => {
     expect(getChunkByPath('/test')).toEqual([]);
   });
+
+  it('with routeFilter', () => {
+    expect(getChunkByPath('/user/123', preloadConfig, (route) => {
+      return route.filter !== true;
+    })).toEqual(['components__test.js', 'p__index__abc.js', 'p__index__123.js', 'p__b.js']);
+  })
 });
 
 

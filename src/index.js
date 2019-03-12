@@ -17,9 +17,17 @@ function normalizeEntry(entry) {
     .replace(/\.tsx?$/, '');
 }
 
-function patchDataWithRoutes(preloadMap, routes = [], chunkGroupData, parentChunks = [], dva) {
+function getPreloadKey(route, preloadKeyGenerator) {
+  let preloadKey;
+  if (preloadKeyGenerator) {
+    preloadKey = preloadKeyGenerator(route);
+  }
+  return preloadKey || route.preloadKey || route.path || '__404'; // __404 是为了配置路由的情况下的 404 页面
+}
+
+function patchDataWithRoutes(preloadMap, routes = [], chunkGroupData, parentChunks = [], dva, preloadKeyGenerator) {
   routes.forEach(route => {
-    const key = route.preloadKey || route.path || '__404'; // __404 是为了配置路由的情况下的 404 页面
+    const key = getPreloadKey(route, preloadKeyGenerator);
     preloadMap[key] = preloadMap[key] || [];
     const webpackChunkName = normalizeEntry(route.component || 'common_component')
       .replace(/^src__/, '')
@@ -41,11 +49,11 @@ function patchDataWithRoutes(preloadMap, routes = [], chunkGroupData, parentChun
       return isMatch;
     }).map(group => group.chunks));
     preloadMap[key] = uniq(preloadMap[key].concat(parentChunks).concat(chunks));
-    patchDataWithRoutes(preloadMap, route.routes, chunkGroupData, preloadMap[key], dva)
+    patchDataWithRoutes(preloadMap, route.routes, chunkGroupData, preloadMap[key], dva, preloadKeyGenerator)
   });
 }
 
-function getPreloadData({ compilation }, routes, { useRawFileName, dva }) {
+function getPreloadData({ compilation }, routes, { useRawFileName, dva, preloadKeyGenerator }) {
   const allChunks = compilation.chunkGroups;
   // preloadData like this:
   // {
@@ -66,23 +74,24 @@ function getPreloadData({ compilation }, routes, { useRawFileName, dva }) {
       })),
     };
   });
-  patchDataWithRoutes(preloadMap, routes, chunkGroupData, [], dva);
+  patchDataWithRoutes(preloadMap, routes, chunkGroupData, [], dva, preloadKeyGenerator);
   return {
-    routes: parseRoutesInfo(routes),
+    routes: parseRoutesInfo(routes, preloadKeyGenerator),
     preloadMap,
   };
 }
 
-function parseRoutesInfo(routes) {
+function parseRoutesInfo(routes, preloadKeyGenerator) {
   return routes.map(route => {
     const ret = {
       path: route.path,
       exact: route.exact,
       redirect: route.redirect,
-      preloadKey: route.preloadKey || route.path ||  '__404',
+      matchCondition: route.matchCondition,
+      preloadKey: getPreloadKey(route, preloadKeyGenerator),
     }
     if (route.routes) {
-      ret.routes = parseRoutesInfo(route.routes);
+      ret.routes = parseRoutesInfo(route.routes, preloadKeyGenerator);
     }
     return ret;
   });
@@ -92,7 +101,7 @@ const PRELOAD_FILENAME = 'preload.json';
 
 export default function (api, options = {}) {
   const { paths, debug } = api;
-  const { useRawFileName = false, dva = false } = options;
+  const { useRawFileName = false, dva = false, preloadKeyGenerator } = options;
 
   function writePreloadData(target, data) {
     debug(`will write preload file to ${target}`);
@@ -104,6 +113,7 @@ export default function (api, options = {}) {
     const preloadData = getPreloadData(stats, api.routes, {
       useRawFileName: false,
       dva,
+      preloadKeyGenerator,
     });
     const filePath = join(paths.absTmpDirPath, PRELOAD_FILENAME);
     writePreloadData(filePath, preloadData);
@@ -113,6 +123,7 @@ export default function (api, options = {}) {
     const preloadData = getPreloadData(stats, api.routes, {
       useRawFileName,
       dva,
+      preloadKeyGenerator,
     });
     const filePath = join(paths.absOutputPath, PRELOAD_FILENAME);
     writePreloadData(filePath, preloadData)

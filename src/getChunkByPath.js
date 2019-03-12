@@ -2,13 +2,13 @@
 
 import matchRoutes from './matchRoutes';
 
-const getChunkByPath = (path, config) => {
+const getChunkByPath = (path, config, routeFilter) => {
   if (!path || !config) {
     console.error('getChunkByPath require path and config args.');
     return [];
   }
   const { preloadMap = {}, routes = [] } = config;
-  const matchedRoutes = matchRoutes(routes, path);
+  const matchedRoutes = matchRoutes(routes, path, routeFilter);
   const matchRoute = matchedRoutes.pop();
   let chunks = [];
   if (matchRoute && matchRoute.route) {
