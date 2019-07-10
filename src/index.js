@@ -110,7 +110,8 @@ export default function (api, options = {}) {
   }
 
   api.onDevCompileDone(({ stats }) => {
-    const preloadData = getPreloadData(stats, api.routes, {
+    const targetStats = Array.isArray(stats.stats) ? stats.stats[0] : stats;
+    const preloadData = getPreloadData(targetStats, api.routes, {
       useRawFileName: false,
       dva,
       preloadKeyGenerator,
@@ -120,7 +121,8 @@ export default function (api, options = {}) {
   });
 
   api.onBuildSuccess(({ stats }) => {
-    const preloadData = getPreloadData(stats, api.routes, {
+    const targetStats = Array.isArray(stats.stats) ? stats.stats[0] : stats;
+    const preloadData = getPreloadData(targetStats, api.routes, {
       useRawFileName,
       dva,
       preloadKeyGenerator,
