@@ -37,7 +37,7 @@ function patchDataWithRoutes(preloadMap, routes = [], chunkGroupData, parentChun
       let isMatch = false;
       if (group.name === webpackChunkName) {
         isMatch = true;
-      } else if (dva) {
+      } else if (dva && group.name) {
         // p__user__test__models__data.js.js -> p_user__test
         const groupNameWithoutModel = group.name.replace(/__model.+$/, '');
         if (webpackChunkName.indexOf(groupNameWithoutModel) === 0) {
